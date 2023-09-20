@@ -6,14 +6,14 @@ const cors = require('cors');
 
 const port = 3000;
 
-// const apiRouter = require('./routes/apiRouter');
+const apiRouter = require('./routes/apiRouter');
 
 // Define your trusted origins for CORS
 const allowedOrigins = [
   'http://localhost:3000',
+  'http://localhost:8080',
   // 'https://your-production-domain.com',
 ];
-
 
 // added cors and setHeader to try to resolve the "Cross-Origin-Opener-Policy policy would block the window.closed call." error in chrome console after oAuth, but no luck yet
 app.use(
@@ -24,12 +24,12 @@ app.use(
 );
 
 app.use((req, res, next) => {
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
-    next();
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+  next();
 });
 
 app.use(express.json());
-
+app.use('/api', apiRouter);
 
 // serve static assets from the 'build' directory
 // app.use(express.static(path.join(__dirname, 'build')));
