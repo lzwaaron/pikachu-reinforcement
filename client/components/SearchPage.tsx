@@ -4,10 +4,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 // import '../css/styles.css';
 import { Restaurant } from '../../models/restaurantModel';
-import dotenv from 'dotenv';
-dotenv.config();
 
-console.log(process.env.GOOGLEAPI);
 
 const SearchPage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -110,7 +107,7 @@ const SearchPage: React.FC = () => {
                 {/* <p>Distance: {restaurant.distance} meters</p> */}
                 {restaurant.photos && restaurant.photos[0] && (
                   <img
-                    src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos[0].photo_reference}&key=AIzaSyCWdjQ6akYBXf1NXhHMjJ1TvkJUL8BmKuU`}
+                    src={restaurant.photo_url}
                     alt='Restaurant Image'
                     className='w-full h-40 object-cover rounded-lg mb-2'
                   />
@@ -161,9 +158,9 @@ const SearchPage: React.FC = () => {
             <p className='text-lg'>
               <strong>Address:</strong> {selectedRestaurant.vicinity}
             </p>
-            {selectedRestaurant.photos && selectedRestaurant.photos[0] && (
+            {selectedRestaurant.photo_url && (
               <img
-                src={`https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${selectedRestaurant.photos[0].photo_reference}&key=AIzaSyCWdjQ6akYBXf1NXhHMjJ1TvkJUL8BmKuU`}
+                src={selectedRestaurant.photo_url}
                 alt='Restaurant Image'
                 className='w-full h-40 object-cover rounded-lg mb-2'
               />
