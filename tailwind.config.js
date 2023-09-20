@@ -10,7 +10,7 @@
 //   plugins: [],
 // }
 module.exports = {
-  content: ['./build/*.html', './client/**/*.{js,jsx}', './index.html'],
+  purge: ['./build/*.html', './client/**/*.{js,jsx,ts,tsx}', './index.html'],
   theme: {
     extend: {
       fontFamily:{

@@ -4,7 +4,7 @@ const nodePolyFillPlugin = require('node-polyfill-webpack-plugin');
 
 module.exports = {
   devServer: {
-    hot: true,
+    // hot: true,
     historyApiFallback: true,
     port: 8080,
     static: [
