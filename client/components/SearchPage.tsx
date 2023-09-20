@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 // import '../css/styles.css';
 import { Restaurant } from '../../models/restaurantModel';
-
+import SavedRestaurant from './SavedRestaurant'; // import the SaveRestaurant component
 
 const SearchPage: React.FC = () => {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -13,6 +13,7 @@ const SearchPage: React.FC = () => {
   const [foodType, setFoodType] = useState<string>('');
   const [searchInitiated, setSearchInitiated] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [savedRestaurants, setSavedRestaurants] = useState<Restaurant[]>([]); // Add a new state variable to hold the saved restaurants
 
   const fetchRestaurants = async () => {
     try {
@@ -23,12 +24,9 @@ const SearchPage: React.FC = () => {
         console.log(latitude);
         console.log(longitude);
         console.log('foodtype :>> ', foodType);
-        const response = await axios.get(
-          'http://localhost:3000/api/restaurants',
-          {
-            params: { latitude, longitude, keyword: foodType },
-          }
-        );
+        const response = await axios.get('/api/restaurants', {
+          params: { latitude, longitude, keyword: foodType },
+        });
         console.log(response);
         setRestaurants(response.data);
         setLoading(false); // Set loading to false when the search is completed
@@ -54,7 +52,26 @@ const SearchPage: React.FC = () => {
   };
 
   const handleSave = (restaurant: Restaurant) => {
-    // Save restaurant to user's "Saved List"
+    // Check if the restaurant is already in the saved list
+    if (
+      savedRestaurants.some(
+        (savedRestaurant) => savedRestaurant.place_id === restaurant.place_id
+      )
+    ) {
+      alert('This restaurant is already in your saved list.');
+    } else {
+      // Add the restaurant to the saved list
+      setSavedRestaurants((prevRestaurants) => [
+        ...prevRestaurants,
+        restaurant,
+      ]);
+    }
+  };
+
+  const handleDelete = (place_id: string) => {
+    setSavedRestaurants((prev) =>
+      prev.filter((restaurant) => restaurant.place_id !== place_id)
+    );
   };
 
   return (
@@ -127,8 +144,7 @@ const SearchPage: React.FC = () => {
                   />
                   View on Google Maps
                 </a>
-
-                <div>
+                <div className='flex justify-center items-center'>
                   <button
                     onClick={() => handleSave(restaurant)}
                     className='bg-green-500 text-white mt-2 p-2 rounded-lg transition duration-300 hover:bg-green-700'
@@ -140,49 +156,69 @@ const SearchPage: React.FC = () => {
             ))
           )}
         </ul>
-        {selectedRestaurant && (
-          <div className='bg-opacity-70 bg-blue backdrop-blur-md p-4 rounded-lg shadow-lg mt-6 w-full lg:w-1/3 lg:ml-4 transition-transform transform hover:scale-105 max-h-70 overflow-y-auto'>
-            <h2 className='font-bold text-xl mb-2 text-red-700 text-center'>
-              Selected Restaurant
-            </h2>
-            <p className='font-bold text-2xl text-center text-blue-700'>
-              🌟{selectedRestaurant.name}🌟
-            </p>
-            {/* <p className="text-xl">Type: {selectedRestaurant.types.join(', ')}</p> */}
-            <p className='text-lg'>
-              <strong>Rating:</strong> {selectedRestaurant.rating}
-            </p>
-            <p className='text-lg'>
-              <strong>Price Level:</strong> {selectedRestaurant.price_level}
-            </p>
-            <p className='text-lg'>
-              <strong>Address:</strong> {selectedRestaurant.vicinity}
-            </p>
-            {selectedRestaurant.photo_url && (
-              <img
-                src={selectedRestaurant.photo_url}
-                alt='Restaurant Image'
-                className='w-full h-40 object-cover rounded-lg mb-2'
-              />
-            )}
-            <a
-              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
-                selectedRestaurant.name
-              )}+${encodeURIComponent(selectedRestaurant.vicinity)}`}
-              target='_blank'
-              rel='noopener noreferrer'
-              className='text-blue-500 underline mt-2 inline-block'
-            >
-              <img
-                src='https://img.icons8.com/color/48/000000/google-maps.png'
-                alt='Google Maps Icon'
-                className='inline-block mr-1 h-5 w-5'
-              />
-              View on Google Maps
-            </a>
-            {/* <p className="text-lg">Distance: {selectedRestaurant.distance} meters</p> */}
+        <div className='bg-opacity-70 bg-blue backdrop-blur-md p-4 rounded-lg shadow-lg mt-6 w-full lg:w-1/3 lg:ml-4 transition-transform transform hover:scale-105 max-h-70 overflow-y-auto'>
+          {selectedRestaurant && (
+            <div>
+              <h2 className='font-bold text-xl mb-2 text-red-700 text-center'>
+                Selected Restaurant
+              </h2>
+              <p className='font-bold text-2xl text-center text-blue-700'>
+                🌟{selectedRestaurant.name}🌟
+              </p>
+              {/* <p className="text-xl">Type: {selectedRestaurant.types.join(', ')}</p> */}
+              <p className='text-lg'>
+                <strong>Rating:</strong> {selectedRestaurant.rating}
+              </p>
+              <p className='text-lg'>
+                <strong>Price Level:</strong> {selectedRestaurant.price_level}
+              </p>
+              <p className='text-lg'>
+                <strong>Address:</strong> {selectedRestaurant.vicinity}
+              </p>
+              {selectedRestaurant.photo_url && (
+                <img
+                  src={selectedRestaurant.photo_url}
+                  alt='Restaurant Image'
+                  className='w-full h-40 object-cover rounded-lg mb-2'
+                />
+              )}
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+                  selectedRestaurant.name
+                )}+${encodeURIComponent(selectedRestaurant.vicinity)}`}
+                target='_blank'
+                rel='noopener noreferrer'
+                className='text-blue-500 underline mt-2 inline-block'
+              >
+                <img
+                  src='https://img.icons8.com/color/48/000000/google-maps.png'
+                  alt='Google Maps Icon'
+                  className='inline-block mr-1 h-5 w-5'
+                />
+                View on Google Maps
+              </a>
+              <div className='flex justify-center items-center'>
+                <button
+                  onClick={() =>
+                    selectedRestaurant && handleSave(selectedRestaurant)
+                  }
+                  className='bg-green-500 text-white mt-2 p-2 rounded-lg transition duration-300 hover:bg-green-700'
+                >
+                  Save
+                </button>
+              </div>
+
+              {/* <p className="text-lg">Distance: {selectedRestaurant.distance} meters</p> */}
+            </div>
+          )}
+          {/* Add the SavedRestaurant right below the Selected Restaurant section */}
+          <div>
+            <SavedRestaurant
+              savedRestaurants={savedRestaurants}
+              handleDelete={handleDelete}
+            />
           </div>
-        )}
+        </div>
       </div>
     </div>
   );
