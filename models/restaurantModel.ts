@@ -14,6 +14,7 @@ export interface Restaurant {
     photo_reference: string;
     width: number;
   }>;
+  photo_url?: string; // Add this line to include the photo_url property
 }
 
 declare namespace NodeJS {

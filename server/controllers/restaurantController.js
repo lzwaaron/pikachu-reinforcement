@@ -23,7 +23,14 @@ const restaurantController = {
         }
       );
       console.log('response :>> ', response);
-      res.locals.restaurants = response.data.results.slice(0, 10); // Get top 10 results
+      const restaurants = response.data.results.slice(0, 10).map(restaurant => {
+        if (restaurant.photos && restaurant.photos[0]) {
+          restaurant.photo_url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos[0].photo_reference}&key=${process.env.GOOGLEAPI}`;
+        }
+        return restaurant;
+      });
+
+      res.locals.restaurants = restaurants; // Get top 10 results with photo URLs
       return next();
     } catch (error) {
       return next({
