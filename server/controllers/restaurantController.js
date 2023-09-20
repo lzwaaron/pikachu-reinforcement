@@ -23,7 +23,13 @@ const restaurantController = {
         }
       );
       console.log('response :>> ', response);
-      const restaurants = response.data.results.slice(0, 10).map(restaurant => {
+      // Shuffle the array
+      const shuffledRestaurants = response.data.results.sort(
+        () => 0.5 - Math.random()
+      );
+
+      // Get up to 10 random restaurants
+      const restaurants = shuffledRestaurants.slice(0, 10).map((restaurant) => {
         if (restaurant.photos && restaurant.photos[0]) {
           restaurant.photo_url = `https://maps.googleapis.com/maps/api/place/photo?maxwidth=400&photoreference=${restaurant.photos[0].photo_reference}&key=${process.env.GOOGLEAPI}`;
         }
