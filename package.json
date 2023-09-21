@@ -20,6 +20,7 @@
     "jwt-decode": "^3.1.2",
     "mongodb": "^5.7.0",
     "mongoose": "^7.4.2",
+    "mysql": "^2.18.1",
     "node": "^20.5.0",
     "node-polyfill-webpack-plugin": "^2.0.1",
     "pg": "^8.11.2",
