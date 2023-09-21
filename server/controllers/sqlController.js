@@ -37,6 +37,10 @@ sqlController.addFav = async(req,res,next) =>{
     next();
 }
 
+sqlController.delSaved = async(req,res,next) =>{
+    qry = "DELETE * FROM fav_list WHERE "
+}
+
 sqlController.getList = async(req,res,next) =>{
     qry = "SELECT * FROM fav_list WHERE u_id = ($1);"
 
