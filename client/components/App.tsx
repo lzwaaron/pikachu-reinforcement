@@ -53,7 +53,7 @@ const App: React.FC = () => {
   return (
     <div>
       {isLoggedin ? '' : <LoginPage />}
-      <h1>Hello Pikachu</h1>
+      <h1>Hello {user.given_name}</h1>
       <h1>Restaurant Finder</h1>
       {isLoggedin ? <SearchPage /> : ''}
     </div>
