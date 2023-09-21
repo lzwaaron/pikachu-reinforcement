@@ -1,21 +1,15 @@
-// client/components/App.tsx
-
-import React from 'react';
-import SearchPage from './SearchPage';
-import LoginPage from './LoginPage';
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { User } from '../../models/restaurantModel';
 import jwt_decode from 'jwt-decode';
 declare const google: any;
 
-const App: React.FC = () => {
+const LoginPage: React.FC = () => {
   const defaultUser: User = {
     given_name: '',
     email: '',
     picture: '',
   };
 
-  const [isLoggedin, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<User>(defaultUser);
 
   function handleCallbackResponse(response: any) {
@@ -24,13 +18,13 @@ const App: React.FC = () => {
     console.log(userObject.email);
     setUser(userObject);
     document.getElementById('signInDiv')!.hidden = true;
-    setIsLoggedIn(true);
+    localStorage.setItem('WFL', 'true');
   }
 
   function handleSignout() {
     setUser(defaultUser);
     document.getElementById('signInDiv')!.hidden = false;
-    setIsLoggedIn(false);
+    localStorage.setItem('WFL', 'false');
   }
 
   useEffect(() => {
@@ -47,17 +41,22 @@ const App: React.FC = () => {
       type: 'standard',
     });
 
-    // google.accounts.id.prompt();
+    google.accounts.id.prompt();
   }, []);
 
   return (
-    <div>
-      {isLoggedin ? '' : <LoginPage />}
-      <h1>Hello {user.given_name}</h1>
-      <h1>Restaurant Finder</h1>
-      {isLoggedin ? <SearchPage /> : ''}
+    <div className='Login'>
+      <div id='signInDiv'></div>
+      {user && <img src={user.picture} alt='' />}
+      <button
+        type='button'
+        className='cursor-pointer bg-blue-200'
+        onClick={handleSignout}
+      >
+        Logout
+      </button>
     </div>
   );
 };
 
-export default App;
+export default LoginPage;

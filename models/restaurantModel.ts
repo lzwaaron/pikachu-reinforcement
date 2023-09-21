@@ -22,3 +22,10 @@ declare namespace NodeJS {
     GOOGLEAPI: string;
   }
 }
+
+export interface User {
+  email: string;
+  given_name: string;
+  picture: string;
+  // name: string | null;
+}
