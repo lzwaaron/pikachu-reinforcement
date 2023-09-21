@@ -9,6 +9,9 @@ import { Restaurant } from '../../models/restaurantModel';
 import { User } from '../../models/restaurantModel';
 import SavedRestaurant from './SavedRestaurant'; // import the SaveRestaurant component
 import Logo from './assets/wfl_logo4.png';
+import Logo2 from './assets/pikachu_icon.png';
+import Logo3 from './assets/wfl_name.png';
+import DropdownMenu from './Dropdown';
 
 const SearchPage: React.FC = () => {
   const defaultUser: User = {
@@ -96,7 +99,7 @@ const SearchPage: React.FC = () => {
     setSelectedRestaurant(randomRestaurant);
   };
 
-  const handleSave = (restaurant: Restaurant) => {
+  const handleSave = async (restaurant: Restaurant) => {
     // Check if the restaurant is already in the saved list
     if (
       savedRestaurants.some(
@@ -104,41 +107,92 @@ const SearchPage: React.FC = () => {
       )
     ) {
       alert('This restaurant is already in your saved list.');
-    } else {
-      // Add the restaurant to the saved list
-      setSavedRestaurants((prevRestaurants) => [
-        ...prevRestaurants,
-        restaurant,
-      ]);
+      return; // Exit the function early
+    }
+    // Add the restaurant to the saved list
+    setSavedRestaurants((prevRestaurants) => [...prevRestaurants, restaurant]);
+    try {
+      // console.log("in saveIt Function...!")
+      let dataBody = {
+        email: user.email,
+        placeID: restaurant.place_id,
+        name: restaurant.name,
+        address: restaurant.vicinity,
+        link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+          restaurant.name
+        )}+${encodeURIComponent(restaurant.vicinity)}`,
+      };
+      // console.log("databody" + dataBody.email)
+      // console.log("databody" + dataBody.location)
+      // console.log("databody" + dataBody.address)
+      const response = await fetch('/api/saveLoc', {
+        method: 'POST',
+        body: JSON.stringify(dataBody),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log('Error in the saveIt function:', error);
     }
   };
-
-  const handleDelete = (place_id: string) => {
+  const handleDelete = async (place_id: string) => {
     setSavedRestaurants((prev) =>
       prev.filter((restaurant) => restaurant.place_id !== place_id)
     );
+    try {
+      // console.log("in saveIt Function...!")
+      let dataBody = {
+        email: user.email,
+        placeID: place_id,
+      };
+      // console.log("databody" + dataBody.email)
+      // console.log("databody" + dataBody.location)
+      // console.log("databody" + dataBody.address)
+      const response = await fetch('/api/delLoc', {
+        method: 'POST',
+        body: JSON.stringify(dataBody),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.log('Error in the saveIt function:', error);
+    }
   };
 
   return (
     <>
       <nav className='flex justify-between fixed top-0 w-full bg-yellow-200 shadow-md p-2'>
-        <h1 className='ml-52'>{'   '}</h1>
+        <img src={Logo} className='w-48 h-48  mx-3 my-3 '></img>
+        <img src={Logo3} className='w-auto h-48  mx-3 my-3 '></img>
+        {
+          <div className='mr-5'>
+            <div>
+              {isLoggedin && (
+                <button
+                  type='button'
+                  className='cursor-pointer h-10 w-52 bg-white'
+                  onClick={handleSignout}
+                >
+                  Logout
+                </button>
+              )}
+              <div id='signInDiv'></div>
+            </div>
+            <img
+              src={isLoggedin ? user.picture : Logo2}
+              // alt=''
+              className='w-28 h-28 object-cover rounded-full mt-3 mx-auto'
+            />
 
-        <img src={Logo} className='w-36 h-36  mx-3 my-3 '></img>
-
-        <div id='signInDiv'></div>
-        {isLoggedin && (
-          <div className='mr-20'>
-            <h1>{user.given_name}</h1>
-            <button>
-              <img
-                src={user.picture}
-                // alt=''
-                className='w-28 h-28 object-cover rounded-full mb-10'
-              />
-            </button>
+            <h1 className='my-1'>{isLoggedin ? user.given_name : 'Guest'}</h1>
           </div>
-        )}
+        }
         {/* {isLoggedin ? (
           <button
             type='button'
@@ -152,7 +206,7 @@ const SearchPage: React.FC = () => {
         )} */}
       </nav>
 
-      <div className='searchPage flex flex-col items-center bg-teal-50 min-h-screen pt-60 px-32'>
+      <div className='searchPage flex flex-col items-center bg-teal-50 min-h-screen pt-72 px-32'>
         <div className='flex space-x-4 mb-6'>
           <input
             type='text'
