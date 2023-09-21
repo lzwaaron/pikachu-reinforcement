@@ -65,6 +65,8 @@ module.exports = {
         test: /\.(png|jpg|jpeg|gif)$/i,
         type: 'asset/resource',
       },
+
+      { test: /\\.(png|jp(e*)g|svg|gif)$/, use: ['file-loader'] },
     ],
   },
   resolve: {
