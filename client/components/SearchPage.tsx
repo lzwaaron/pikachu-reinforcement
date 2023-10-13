@@ -23,6 +23,17 @@ const SearchPage: React.FC = () => {
   const [isLoggedin, setIsLoggedIn] = useState<boolean>(false);
   const [user, setUser] = useState<User>(defaultUser);
 
+  function fetchSavedRestaurants(email: string) {
+    axios
+      .post('/api/getSavedRestaurants', { email: email })
+      .then((response) => {
+        setSavedRestaurants(response.data.savedRestaurants);
+      })
+      .catch((error) => {
+        console.error('Error fetching saved restaurants:', error);
+      });
+  }
+
   function handleCallbackResponse(response: any) {
     console.log('Encoded JWT ID token:' + response.credential);
     const userObject: User = jwt_decode(response.credential);
@@ -30,6 +41,7 @@ const SearchPage: React.FC = () => {
     setUser(userObject);
     document.getElementById('signInDiv')!.hidden = true;
     setIsLoggedIn(true);
+    fetchSavedRestaurants(userObject.email);
   }
 
   function handleSignout() {
@@ -115,9 +127,9 @@ const SearchPage: React.FC = () => {
       // console.log("in saveIt Function...!")
       let dataBody = {
         email: user.email,
-        placeID: restaurant.place_id,
+        place_id: restaurant.place_id,
         name: restaurant.name,
-        address: restaurant.vicinity,
+        vicinity: restaurant.vicinity,
         link: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
           restaurant.name
         )}+${encodeURIComponent(restaurant.vicinity)}`,
@@ -136,7 +148,7 @@ const SearchPage: React.FC = () => {
       console.log(data);
     } catch (error) {
       console.log('Error in the saveIt function:', error);
-    }
+    }   
   };
   const handleDelete = async (place_id: string) => {
     setSavedRestaurants((prev) =>
@@ -145,8 +157,8 @@ const SearchPage: React.FC = () => {
     try {
       // console.log("in saveIt Function...!")
       let dataBody = {
-        email: user.email,
-        placeID: place_id,
+        email: user.email, 
+        place_id: place_id,
       };
       // console.log("databody" + dataBody.email)
       // console.log("databody" + dataBody.location)
@@ -163,7 +175,7 @@ const SearchPage: React.FC = () => {
     } catch (error) {
       console.log('Error in the saveIt function:', error);
     }
-  };
+  };  
 
   return (
     <>
@@ -348,7 +360,7 @@ const SearchPage: React.FC = () => {
                 <SavedRestaurant
                   savedRestaurants={savedRestaurants}
                   handleDelete={handleDelete}
-                />
+                />  
               </div>
             ) : (
               ''

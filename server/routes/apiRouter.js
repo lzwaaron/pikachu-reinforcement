@@ -19,4 +19,9 @@ apiRouter.get('/restaurants', restaurantController.fetchRestaurants, (req, res) 
   res.status(200).json(res.locals.restaurants);
 });
 
+// New API endpoint to fetch saved restaurants for a user
+apiRouter.post('/getSavedRestaurants', mdbController.getSavedRestaurants, (req, res) => {
+  res.status(200).json({message: 'Saved restaurants fetched', savedRestaurants: res.locals.savedRestaurants});
+});
+
 module.exports = apiRouter;
