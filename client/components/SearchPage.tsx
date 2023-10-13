@@ -37,17 +37,25 @@ const SearchPage: React.FC = () => {
   function handleCallbackResponse(response: any) {
     console.log('Encoded JWT ID token:' + response.credential);
     const userObject: User = jwt_decode(response.credential);
+    document.cookie = `userToken=${response.credential}; max-age=3600; path=/;`; //add cookie to stay logged in
     console.log(userObject.email);
     setUser(userObject);
-    document.getElementById('signInDiv')!.hidden = true;
+    // document.getElementById('signInDiv')!.hidden = true;
     setIsLoggedIn(true);
     fetchSavedRestaurants(userObject.email);
   }
 
   function handleSignout() {
     setUser(defaultUser);
-    document.getElementById('signInDiv')!.hidden = false;
+    // document.getElementById('signInDiv')!.hidden = false;
     setIsLoggedIn(false);
+    document.cookie = 'userToken=; max-age=0; path=/;'; // clear cookie when sign out
+
+    // manually display the sign-in button
+    const signInDiv = document.getElementById('signInDiv');
+    if (signInDiv) {
+      signInDiv.style.display = 'block';
+    }
   }
 
   useEffect(() => {
@@ -65,6 +73,23 @@ const SearchPage: React.FC = () => {
     });
 
     // google.accounts.id.prompt();
+
+    // check for cookie and validate user
+    const token = document.cookie
+      .split('; ')
+      .find((row) => row.startsWith('userToken'))
+      ?.split('=')[1];
+
+    if (token) {
+      try {
+        const userObject: User = jwt_decode(token);
+        setUser(userObject);
+        setIsLoggedIn(true);
+        fetchSavedRestaurants(userObject.email);
+      } catch (error) {
+        console.error('Invalid token', error);
+      }
+    }
   }, []);
 
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -112,6 +137,12 @@ const SearchPage: React.FC = () => {
   };
 
   const handleSave = async (restaurant: Restaurant) => {
+    // Check if the user is logged in
+    if (!isLoggedin) {
+      alert("Please log in to save your favorite places");
+      return;
+    }
+  
     // Check if the restaurant is already in the saved list
     if (
       savedRestaurants.some(
@@ -121,10 +152,11 @@ const SearchPage: React.FC = () => {
       alert('This restaurant is already in your saved list.');
       return; // Exit the function early
     }
+    
     // Add the restaurant to the saved list
     setSavedRestaurants((prevRestaurants) => [...prevRestaurants, restaurant]);
+    
     try {
-      // console.log("in saveIt Function...!")
       let dataBody = {
         email: user.email,
         place_id: restaurant.place_id,
@@ -134,9 +166,6 @@ const SearchPage: React.FC = () => {
           restaurant.name
         )}+${encodeURIComponent(restaurant.vicinity)}`,
       };
-      // console.log("databody" + dataBody.email)
-      // console.log("databody" + dataBody.location)
-      // console.log("databody" + dataBody.address)
       const response = await fetch('/api/saveLoc', {
         method: 'POST',
         body: JSON.stringify(dataBody),
@@ -148,8 +177,9 @@ const SearchPage: React.FC = () => {
       console.log(data);
     } catch (error) {
       console.log('Error in the saveIt function:', error);
-    }   
+    }
   };
+  
   const handleDelete = async (place_id: string) => {
     setSavedRestaurants((prev) =>
       prev.filter((restaurant) => restaurant.place_id !== place_id)
@@ -157,7 +187,7 @@ const SearchPage: React.FC = () => {
     try {
       // console.log("in saveIt Function...!")
       let dataBody = {
-        email: user.email, 
+        email: user.email,
         place_id: place_id,
       };
       // console.log("databody" + dataBody.email)
@@ -175,7 +205,7 @@ const SearchPage: React.FC = () => {
     } catch (error) {
       console.log('Error in the saveIt function:', error);
     }
-  };  
+  };
 
   return (
     <>
@@ -194,7 +224,14 @@ const SearchPage: React.FC = () => {
                   Logout
                 </button>
               )}
-              <div id='signInDiv'></div>
+              {/* <div id='signInDiv'></div> */}
+
+              {!isLoggedin && (
+                <div
+                  id='signInDiv'
+                  // style={{ display: isLoggedin ? 'none' : 'block' }}
+                ></div>
+              )}
             </div>
             <img
               src={isLoggedin ? user.picture : Logo2}
@@ -360,7 +397,7 @@ const SearchPage: React.FC = () => {
                 <SavedRestaurant
                   savedRestaurants={savedRestaurants}
                   handleDelete={handleDelete}
-                />  
+                />
               </div>
             ) : (
               ''
