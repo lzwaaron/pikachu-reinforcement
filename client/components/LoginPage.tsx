@@ -15,6 +15,7 @@ const LoginPage: React.FC = () => {
   function handleCallbackResponse(response: any) {
     console.log('Encoded JWT ID token:' + response.credential);
     const userObject: User = jwt_decode(response.credential);
+    
     console.log(userObject.email);
     setUser(userObject);
     document.getElementById('signInDiv')!.hidden = true;
