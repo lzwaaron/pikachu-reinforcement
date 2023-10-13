@@ -8,6 +8,6 @@
     "rootDir": "./",
     "strict": true
   },
-  "include": ["**/*.ts", "**/*.tsx"],
+  "include": ["**/*.ts", "**/*.tsx", "__tests__/fetch.test.js"],
   "exclude": ["node_modules"]
 }

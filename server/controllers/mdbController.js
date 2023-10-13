@@ -1,95 +1,133 @@
 const User = require('../db.js');
 
-const express = require("express");
+const express = require('express');
 const db = require('../db.js');
 const mdbController = {
-    delete: async (req,res,next) => {
-        try{
-            let email = req.body.email;
-            let placeID = req.body.placeID;
+  delete: async (req, res, next) => {
+    try {
+      let email = req.body.email;
+      let place_id = req.body.place_id;
 
-            console.log("email : " + email + " placeID : " + placeID)
-    
-            const result = await User.updateOne({ email: email},
-                { $pull: { savedList: { placeID: placeID}}});
-            
-            res.locals.savedList = result;
-            //console.log(res.locals.user)
-            //console.log(User.find({email: email}, {savedList: 1}))
-            return next();
-        }catch(err){
-            err = {
-                log: 'There was an error in the mdbController.delete middleware' + err,
-                status: 500,
-                message: { err: 'There was an unknown server error'}
-            }
-            return next(err);
-        }
-    },
-    
-    //from search screen when user presses save
-    saveTo: async (req,res,next) => {
-        //deconstruct the request body
-        let e = req.body.email;
-        let p = req.body.placeID;
-        let n = req.body.name;
-        let a = req.body.address;
-        let l = req.body.link
+      console.log('email : ' + email + ' place_id : ' + place_id);
 
-        console.log( "email : " + e +
-                    " placeID : " + p +
-                    " name : " + n +
-                    " address + " + a +
-                    " link : " + l 
-        )
-        
-        //make a newSave Location object
-        //update object according to email -> if it doesn't exist, create new document with said email
-        // console.log("email, location and address are" +  email + address + name + placeID + link);
-        // const identifier = { email: e }
+      const result = await User.updateOne(
+        { email: email },
+        { $pull: { savedList: { place_id: place_id } } }
+      );
 
-        const place = { $push: { savedList: { placeID : p, name: n, address: a, link: l }} }
-        const option = {new: true, upsert: true}
-
-        try{
-            
-            // console.log("User exists? " + place )
-            const result = await User.findOneAndUpdate({ "email": e }, place, option);
-            console.log("result")
-            res.locals.user = result;
-            console.log(res.locals.user)
-            //console.log(User.find({email: e}, {savedList: 1}))
-            return next();
-        }catch(err){
-            err = {
-                log: 'There was an error in the mbdontroller.saveTo middleware ' + err,
-                status: 500,
-                message: { err: 'There was an unknown server error'}
-            }
-            return next(err);
-        }
-    },
-    
-    getRows: async (req,res,next) =>{
-        try{
-            let {email} = req.body;
-            console.log('in getRows email', email);
-            const result = await User.findOne({email: email}, {savedList:1});
-            res.locals.savedList = result;
-            //console.log(result);
-            next();
-    
-        }catch(err){
-            err = {
-                log: 'There was an error in the mdbController.getRows middleware' + err,
-                status: 500,
-                message: { err: 'There was an unknown server error'}
-            }
-            return next(err);
-        }
+      res.locals.savedList = result;
+      //console.log(res.locals.user)
+      //console.log(User.find({email: email}, {savedList: 1}))
+      return next();
+    } catch (err) {
+      err = {
+        log: 'There was an error in the mdbController.delete middleware' + err,
+        status: 500,
+        message: { err: 'There was an unknown server error' },
+      };
+      return next(err);
     }
-    
-};
+  },
 
+  //from search screen when user presses save
+  saveTo: async (req, res, next) => {
+    let e = req.body.email;
+    let p = req.body.place_id;
+    let n = req.body.name;
+    let a = req.body.vicinity;
+    let l = req.body.link;
+  
+    console.log(
+      'email : ' +
+        e +
+        ' place_id : ' +
+        p +
+        ' name : ' +
+        n +
+        ' vicinity : ' +
+        a +
+        ' link : ' +
+        l
+    );
+  
+    try {
+      // Check if the restaurant is already saved
+      let user = await User.findOne({ email: e });
+  
+      // If user does not exist, create a new user
+      if (!user) {
+        console.log(`No user found with email: ${e}. Creating a new user.`);
+        user = new User({
+          email: e,
+          savedList: [],
+          // Add any other default fields as per your User schema
+        });
+        await user.save();
+      }
+  
+      // Check if savedList exists and if the restaurant is already saved
+      if (user.savedList && user.savedList.some((restaurant) => restaurant.place_id === p)) {
+        console.log('Restaurant is already saved.');
+        res.locals.user = user;
+        return next();
+      }
+  
+      // If not, save the new restaurant
+      const place = {
+        $push: { savedList: { place_id: p, name: n, vicinity: a, link: l } },
+      };
+      const option = { new: true, upsert: true };
+  
+      const result = await User.findOneAndUpdate({ email: e }, place, option);
+      console.log('result', result);
+      res.locals.user = result;
+      return next();
+    } catch (err) {
+      err = {
+        log: 'There was an error in the mdbController.saveTo middleware ' + err,
+        status: 500,
+        message: { err: 'There was an unknown server error' },
+      };
+      return next(err);
+    }
+  },
+  
+  
+
+  getRows: async (req, res, next) => {
+    try {
+      let { email } = req.body;
+      console.log('in getRows email', email);
+      const result = await User.findOne({ email: email }, { savedList: 1 });
+      res.locals.savedList = result;
+      //console.log(result);
+      next();
+    } catch (err) {
+      err = {
+        log: 'There was an error in the mdbController.getRows middleware' + err,
+        status: 500,
+        message: { err: 'There was an unknown server error' },
+      };
+      return next(err);
+    }
+  },
+
+  getSavedRestaurants: async (req, res, next) => {
+    try {
+      const { email } = req.body;
+      const user = await User.findOne({ email: email }, { savedList: 1 });
+      console.log('Fetched saved restaurants:', user.savedList);
+      res.locals.savedRestaurants = user.savedList;
+      next();
+    } catch (err) {
+      err = {
+        log: 'Error in mdbController.getSavedRestaurants: ' + err,
+        status: 500,
+        message: { err: 'An error occurred while fetching saved restaurants.' },
+      };
+      next(err);
+    }
+  },
+};
 
 module.exports = mdbController;

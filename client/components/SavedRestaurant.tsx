@@ -17,7 +17,7 @@ const SavedRestaurant: React.FC<SavedRestaurantProps> = ({
       </h2>
       <table className='min-w-full bg-white'>
         <thead>
-          <tr>
+          <tr>  
             <th className='py-2 text-center'>Name</th>
             <th className='py-2 text-center'>Address</th>
             <th className='py-2 text-center'>Google Map Link</th>
@@ -48,7 +48,7 @@ const SavedRestaurant: React.FC<SavedRestaurantProps> = ({
                 >
                   Delete
                 </button>
-              </td>
+              </td> 
             </tr>
           ))}
         </tbody>

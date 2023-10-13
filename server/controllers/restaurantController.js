@@ -22,7 +22,7 @@ const restaurantController = {
           },
         }
       );
-      console.log('response :>> ', response);
+      // console.log('response :>> ', response);
       // Shuffle the array
       const shuffledRestaurants = response.data.results.sort(
         () => 0.5 - Math.random()
